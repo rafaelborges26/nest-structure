@@ -1,28 +1,21 @@
 import {
     Controller, Post,
+    Req,
     UseGuards
 } from '@nestjs/common'
+import { CurrentUser } from 'src/auth/current-user-decorator'
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard'
-  
-  //import { PrismaService } from 'src/prisma/prisma.service'
-  
-  //const authenticateBodySchema = z.object({
-  //  email: z.string().email(),
-  //  password: z.string(),
-  //})
-  
-
+import { UserPayload } from 'src/auth/jwt.strategy'
   
   @Controller('/questions')
   @UseGuards(JwtAuthGuard)
   export class CreateQuestionController {
     constructor() {}
     @Post()
-    //@HttpCode(201) // determinando o sucesso
-    //@UsePipes(new ZodValidationPipe(authenticateBodySchema)) // adicionar validação dos campos com o zod
-    async handle() {
+    async handle(@CurrentUser() user: UserPayload ) {
+        console.log(user.sub) //obter os dados 
+
         return 'ok'
-        
     }
   }
   
