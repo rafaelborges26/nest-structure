@@ -29,3 +29,15 @@ Content-Type: application/json
 POST {{BaseUrl}}/questions
 Content-Type: application/json
 Authorization: Bearer {{authToken}}
+
+{
+	"title": "Nova pergunta é aqui",
+	"content": "Quantos anos você tem?"
+}
+
+###
+
+# @name fetch_recent_questions
+GET {{BaseUrl}}/questions
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
