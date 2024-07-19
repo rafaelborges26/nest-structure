@@ -1,17 +1,18 @@
 import {
-    Body,
-    Controller, Get, Post,
-    Req,
+    Controller, Get,
+    Query,
     UseGuards,
-    UsePipes
 } from '@nestjs/common'
-import { CurrentUser } from 'src/auth/current-user-decorator'
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard'
-import { UserPayload } from 'src/auth/jwt.strategy'
 import { ZodValidationPipe } from 'src/pipes/zod-validation.pipe'
 import { PrismaService } from 'src/prisma/prisma.service'
 import { z } from 'zod'
 
+const pageQueryParamSchema = z.string().optional().default('1').transform(Number).pipe(z.number().min(1))
+
+const queryValidationPipe = new ZodValidationPipe(pageQueryParamSchema)
+
+type PageQueryParamSchema = z.infer<typeof pageQueryParamSchema>
 
 
   @Controller('/questions')
@@ -19,10 +20,14 @@ import { z } from 'zod'
   export class FetchListenController {
     constructor(private prisma: PrismaService) {}
     @Get()
-    async handle() {
+    async handle(@Query('page', queryValidationPipe) page: PageQueryParamSchema) {
+        const perPage = 1
+
         const questions = await this.prisma.question.findMany({
+            take: perPage, //quantos exibir por página
+            skip: (page -1) * perPage,
             orderBy: {
-                createdAt: 'desc'
+                createdAt: 'desc' //buscar da ordem que foi criado
             }
         })
 
