@@ -7,27 +7,53 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum UserRole {
+  STUDENT
+  INSCTRUCTOR
+}
+
 model User {
   id        String     @id @default(uuid())
   name      String
   email     String     @unique
   password  String
   questions Question[]
+  role      UserRole   @default(STUDENT) //opcional e default STUDENT
+  Answers   Answer[]
 
   @@map("users") //definindo o nome correto para a tabela para não ficar com letra maiúscula e fora do plural (User)
 }
 
 model Question {
-  id        String    @id @default(uuid())
-  title     String
-  slog      String    @unique
-  content   String
-  createdAt DateTime  @default(now()) @map("created_at")
-  updatedAt DateTime? @updatedAt @map("updated_at") // "?" campo não obrigatório
+  id           String    @id @default(uuid())
+  title        String
+  slog         String    @unique
+  content      String
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime? @updatedAt @map("updated_at") // "?" campo não obrigatório
+  bestAnswerId String?   @unique @map("best_answer_id")
 
   //relacionamento entre tabelas
-  author   User   @relation(fields: [authorId], references: [id]) //só de digitar author User e salvar o intelicense já vai relacionar
-  authorId String @map("author_id")
+  author     User    @relation(fields: [authorId], references: [id]) //só de digitar author User e salvar o intelicense já vai relacionar
+  authorId   String  @map("author_id")
+  bestAnswer Answer? @relation("bestAnswer", fields: [bestAnswerId], references: [id])
+
+  answers Answer[]
 
   @@map("questions")
+}
+
+model Answer {
+  id         String    @id @default(uuid())
+  content    String
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime? @updatedAt @map("updated_at") // "?" campo não obrigatório
+  authorId   String    @map("author_id")
+  questionId String    @map("question_id")
+
+  author       User      @relation(fields: [authorId], references: [id]) //só de digitar author User e salvar o intelicense já vai relacionar
+  bestAnswerOn Question? @relation("bestAnswer")
+  question     Question  @relation(fields: [questionId], references: [id])
+
+  @@map("answers")
 }
